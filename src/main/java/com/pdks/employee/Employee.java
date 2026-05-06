@@ -59,4 +59,7 @@ public class Employee {
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
+    @Column(unique = true)
+    private String employeeNumber;
 }

@@ -19,9 +19,8 @@ public class EmployeeService {
     private final TenantRepository   tenantRepo;
 
     public List<Employee> findAll() {
-        return employeeRepo.findAllByStatus(Employee.Status.ACTIVE);
+        return employeeRepo.findAll();
     }
-
     public List<Employee> findByBranch(UUID branchId) {
         return employeeRepo.findAllByBranchIdAndStatus(
             branchId, Employee.Status.ACTIVE);
@@ -34,9 +33,6 @@ public class EmployeeService {
 
     @Transactional
     public Employee create(EmployeeDto dto) {
-        // ── Plan limit kontrolü ──────────────────────────────────────────────
-        checkEmployeeLimit();
-
         Employee emp = new Employee();
         emp.setBranchId(dto.getBranchId());
         emp.setFirstName(dto.getFirstName());
@@ -46,6 +42,11 @@ public class EmployeeService {
         emp.setDepartment(dto.getDepartment());
         emp.setPosition(dto.getPosition());
         emp.setStartDate(dto.getStartDate());
+
+        // Otomatik sicil numarası üret
+        long count = employeeRepo.count() + 1;
+        emp.setEmployeeNumber(String.format("EMP-%04d", count));
+
         return employeeRepo.save(emp);
     }
 
@@ -92,4 +93,6 @@ public class EmployeeService {
             ));
         }
     }
+
+
 }

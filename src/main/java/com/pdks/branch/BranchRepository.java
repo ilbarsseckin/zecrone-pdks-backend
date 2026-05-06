@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
+
 public interface BranchRepository extends JpaRepository<Branch, UUID> {
 
     List<Branch> findAllByIsActiveTrue();

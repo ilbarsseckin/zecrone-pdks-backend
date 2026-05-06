@@ -84,4 +84,6 @@ public class LeaveController {
         leaveService.setEntitledDays(employeeId, year, days);
         return ResponseEntity.noContent().build();
     }
+
+
 }
