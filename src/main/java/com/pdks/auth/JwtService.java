@@ -27,21 +27,26 @@ public class JwtService {
     // Token üret
     public String generateToken(UUID userId, UUID tenantId,
                                 String schemaName, String role,
-                                UUID branchId) {
+                                UUID branchId, String plan) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("tenantId", tenantId.toString());
         claims.put("schema",   schemaName);
         claims.put("role",     role);
+        claims.put("plan",     plan);
         if (branchId != null)
             claims.put("branchId", branchId.toString());
 
         return Jwts.builder()
-            .claims(claims)
-            .subject(userId.toString())
-            .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + expiration))
-            .signWith(getSignKey())
-            .compact();
+                .claims(claims)
+                .subject(userId.toString())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignKey())
+                .compact();
+    }
+
+    public String extractPlan(String token) {
+        return extractClaim(token, c -> c.get("plan", String.class));
     }
 
     public String extractUserId(String token) {

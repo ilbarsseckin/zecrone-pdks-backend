@@ -71,7 +71,13 @@ public class MobileAuthService {
         employeeRepo.save(emp);
 
         String token = jwtService.generateToken(
-            emp.getId(), tenant.getId(), tenant.getSchemaName(), "STAFF", emp.getBranchId());
+                emp.getId(),
+                tenant.getId(),
+                tenant.getSchemaName(),
+                "STAFF",
+                emp.getBranchId(),
+                tenant.getPlan().name()
+        );
 
         Branch branch = branchRepo.findById(emp.getBranchId()).orElse(null);
 

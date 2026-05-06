@@ -103,7 +103,8 @@ class AuthService {
                 tenant.getId(),
                 tenant.getSchemaName(),
                 user.getRole().name(),
-                user.getBranchId()
+                user.getBranchId(),
+                tenant.getPlan().name()
         );
 
         log.info("Giriş: {} / {}", tenant.getCompanyName(), user.getEmail());

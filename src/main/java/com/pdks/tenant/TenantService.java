@@ -144,18 +144,12 @@ public class TenantService {
     }
 
     private int resolveMaxBranches(Tenant.Plan plan) {
-        return switch (plan) {
-            case STARTER      -> 3;
-            case PROFESSIONAL -> 20;
-            case ENTERPRISE   -> Integer.MAX_VALUE;
-        };
+        return plan.getMaxBranches();
     }
 
     private int resolveMaxEmployees(Tenant.Plan plan) {
-        return switch (plan) {
-            case STARTER      -> 50;
-            case PROFESSIONAL -> 500;
-            case ENTERPRISE   -> Integer.MAX_VALUE;
-        };
+        return plan.getMaxEmployees();
     }
+
+
 }

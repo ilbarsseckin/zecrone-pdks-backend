@@ -42,6 +42,38 @@ public class Tenant {
     private LocalDateTime updatedAt;
 
     public enum Plan {
-        STARTER, PROFESSIONAL, ENTERPRISE
+        STARTER, PROFESSIONAL, ENTERPRISE;
+
+        public boolean canExportExcel() {
+            return this == PROFESSIONAL || this == ENTERPRISE;
+        }
+
+        public boolean canUseQr() {
+            return this == PROFESSIONAL || this == ENTERPRISE;
+        }
+
+        public boolean canUseApi() {
+            return this == ENTERPRISE;
+        }
+
+        public boolean canUseErp() {
+            return this == ENTERPRISE;
+        }
+
+        public int getMaxBranches() {
+            return switch (this) {
+                case STARTER      -> 1;
+                case PROFESSIONAL -> 20;
+                case ENTERPRISE   -> Integer.MAX_VALUE;
+            };
+        }
+
+        public int getMaxEmployees() {
+            return switch (this) {
+                case STARTER      -> 50;
+                case PROFESSIONAL -> 500;
+                case ENTERPRISE   -> Integer.MAX_VALUE;
+            };
+        }
     }
 }
