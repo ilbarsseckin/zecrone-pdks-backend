@@ -21,6 +21,7 @@ public class EmployeeService {
     public List<Employee> findAll() {
         return employeeRepo.findAll();
     }
+
     public List<Employee> findByBranch(UUID branchId) {
         return employeeRepo.findAllByBranchIdAndStatus(
             branchId, Employee.Status.ACTIVE);

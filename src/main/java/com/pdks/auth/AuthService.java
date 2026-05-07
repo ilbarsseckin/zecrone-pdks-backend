@@ -71,6 +71,35 @@ class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public AuthResponseDto login(LoginDto dto) {
+
+        // Super Admin kontrolü — tenant gerekmez
+        if ("superadmin@zecrone.com".equals(dto.userEmail)) {
+            TenantContext.setTenant("public");
+            User user = userRepo.findByEmail(dto.userEmail)
+                    .orElseThrow(() -> new BusinessException("Email veya şifre hatalı"));
+
+            if (!passwordEncoder.matches(dto.password, user.getPasswordHash()))
+                throw new BusinessException("Email veya şifre hatalı");
+
+            user.setLastLogin(LocalDateTime.now());
+            userRepo.save(user);
+
+            String token = jwtService.generateToken(
+                    user.getId(),
+                    UUID.fromString("00000000-0000-0000-0000-000000000000"),
+                    "public",
+                    user.getRole().name(),
+                    null,
+                    "ENTERPRISE"
+            );
+
+            AuthResponseDto res = new AuthResponseDto();
+            res.token  = token;
+            res.role   = user.getRole().name();
+            res.userId = user.getId();
+            return res;
+        }
+
         // 1. Firmayı bul
         Tenant tenant = tenantRepo
                 .findByContactEmail(dto.tenantEmail)
@@ -114,7 +143,6 @@ class AuthService {
         res.role     = user.getRole().name();
         res.userId   = user.getId();
         res.branchId = user.getBranchId();
-
         return res;
     }
 
@@ -141,9 +169,15 @@ class AuthService {
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 class AuthController {
-
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final AuthService authService;
     private final TenantRepository tenantRepo;
+
+
+    @GetMapping("/hash")
+    public String hash(@RequestParam String pw) {
+        return passwordEncoder.encode(pw);
+    }
 
     // POST /api/auth/login
     @PostMapping("/login")
@@ -160,4 +194,5 @@ class AuthController {
             @RequestBody RegisterUserDto dto) {
         return ResponseEntity.ok(authService.register(schemaName, dto));
     }
+
 }

@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/tenants").permitAll()
                         .requestMatchers("/api/mobile/auth/login").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/hash", "/api/tenants").permitAll()
                         // Geri kalanı token gerektirir
                         .anyRequest().authenticated()
                 )
