@@ -12,6 +12,13 @@ import java.util.UUID;
 @Table(name = "tenants", schema = "public")
 @Data
 public class Tenant {
+    // Abonelik
+    private LocalDateTime trialEndsAt;
+    private LocalDateTime subscriptionEndsAt;
+
+    // Notlar
+    private String notes;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
