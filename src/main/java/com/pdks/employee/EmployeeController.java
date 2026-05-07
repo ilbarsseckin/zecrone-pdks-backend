@@ -39,7 +39,7 @@ public class EmployeeController {
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<Employee> create(@Valid @RequestBody EmployeeDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(employeeService.create(dto));
+                .body(employeeService.create(dto));
     }
 
     @PutMapping("/{id}")
@@ -59,18 +59,36 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Yönetici çalışan için mobil şifre belirler.
-     * Çalışan ilk defa mobil uygulamaya giriş yaparken bu şifreyi kullanır.
-     */
     @PostMapping("/{id}/set-mobile-password")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> setMobilePassword(
             @PathVariable UUID id,
             @RequestParam String password) {
         mobileAuthService.setInitialPassword(id, password);
-        return ResponseEntity.ok(Map.of(
-            "message", "Mobil şifre başarıyla belirlendi."
-        ));
+        return ResponseEntity.ok(Map.of("message", "Mobil şifre başarıyla belirlendi."));
+    }
+
+    // RF kart ID ata
+    @PatchMapping("/{id}/rf-card")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<Employee> setRfCard(
+            @PathVariable UUID id,
+            @RequestParam String cardId) {
+        return ResponseEntity.ok(employeeService.setRfCard(id, cardId));
+    }
+
+    // QR token yenile
+    @PatchMapping("/{id}/regenerate-qr")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<Employee> regenerateQr(@PathVariable UUID id) {
+        return ResponseEntity.ok(employeeService.regenerateQr(id));
+    }
+
+    // QR veya RF kart ile giriş/çıkış
+    @PostMapping("/checkin-by-token")
+    public ResponseEntity<?> checkinByToken(
+            @RequestParam String token,
+            @RequestParam String branchId) {
+        return ResponseEntity.ok(employeeService.checkinByToken(token, UUID.fromString(branchId)));
     }
 }

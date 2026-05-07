@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/attendance")
 @RequiredArgsConstructor
 public class AttendanceController {
-
+    private final AttendanceRepository attendanceRepo;
     private final AttendanceService attendanceService;
 
     // POST /api/attendance/check-in
@@ -63,5 +64,40 @@ public class AttendanceController {
             @RequestParam int month) {
         return ResponseEntity.ok(
             attendanceService.getMonthlyReport(employeeId, year, month));
+    }
+
+    @PatchMapping("/{id}/edit")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<AttendanceRecord> editRecord(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal String userId) {
+
+        AttendanceRecord rec = attendanceRepo.findById(id)
+                .orElseThrow(() -> new com.pdks.common.BusinessException("Kayıt bulunamadı"));
+
+        if (body.containsKey("checkIn") && !body.get("checkIn").isBlank())
+            rec.setCheckIn(java.time.LocalDateTime.parse(
+                    rec.getWorkDate() + "T" + body.get("checkIn") + ":00"));
+
+        if (body.containsKey("checkOut") && !body.get("checkOut").isBlank())
+            rec.setCheckOut(java.time.LocalDateTime.parse(
+                    rec.getWorkDate() + "T" + body.get("checkOut") + ":00"));
+
+        if (rec.getCheckIn() != null && rec.getCheckOut() != null) {
+            long minutes = java.time.temporal.ChronoUnit.MINUTES.between(
+                    rec.getCheckIn(), rec.getCheckOut());
+            rec.setWorkMinutes((int) minutes);
+        }
+
+        if (body.containsKey("status"))
+            rec.setStatus(AttendanceRecord.Status.valueOf(body.get("status")));
+
+        rec.setManuallyEdited(true);
+        rec.setEditedBy(UUID.fromString(userId));
+        rec.setEditedAt(java.time.LocalDateTime.now());
+        if (body.containsKey("editNote")) rec.setEditNote(body.get("editNote"));
+
+        return ResponseEntity.ok(attendanceRepo.save(rec));
     }
 }

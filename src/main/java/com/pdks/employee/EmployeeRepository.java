@@ -16,6 +16,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     List<Employee> findAllByBranchIdAndStatus(UUID branchId, Employee.Status status);
 
+    Optional<Employee> findByQrToken(String qrToken);
+    Optional<Employee> findByRfCardId(String rfCardId);
+
     boolean existsByEmail(String email);
 
     long countByStatus(Employee.Status status);

@@ -14,7 +14,17 @@ import java.util.UUID;
         columnNames = {"employee_id", "work_date"}))
 @Data
 public class AttendanceRecord {
+    @Column(name = "manually_edited")
+    private Boolean manuallyEdited = false;
 
+    @Column(name = "edited_by")
+    private UUID editedBy;
+
+    @Column(name = "edited_at")
+    private LocalDateTime editedAt;
+
+    @Column(name = "edit_note")
+    private String editNote;
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

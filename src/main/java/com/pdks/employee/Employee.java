@@ -62,4 +62,11 @@ public class Employee {
 
     @Column(unique = true)
     private String employeeNumber;
+
+    @Column(unique = true)
+    private String qrToken;
+
+    @Column(unique = true)
+    private String rfCardId;
+
 }
