@@ -38,6 +38,7 @@ app:
 
   cors:
     allowed-origins:
+      -http://10.0.2.154:3000
       - http://localhost:3000
 
 server:

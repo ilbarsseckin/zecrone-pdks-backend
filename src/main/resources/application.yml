@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/pdksdb
-    username: pdks
-    password: pdks123
+    username: pdks_user
+    password: secret123
     driver-class-name: org.postgresql.Driver
 
   jpa:

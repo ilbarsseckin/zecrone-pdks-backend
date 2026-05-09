@@ -1,0 +1,23 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/apps/zecrone-pdks-backend
+            git pull
+            mvn clean package -DskipTests
+            pkill -f "java -jar" || true
+            nohup java -jar target/*.jar > /tmp/backend-pdks.log 2>&1 &
+            echo "Backend deployed!"
