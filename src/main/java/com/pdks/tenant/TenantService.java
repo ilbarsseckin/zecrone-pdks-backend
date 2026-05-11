@@ -1,6 +1,6 @@
 package com.pdks.tenant;
 
-import com.pdks.config.TenantFlywayConfig;
+import com.pdks.auth.verification.EmailVerificationService;
 import com.pdks.common.BusinessException;
 import com.pdks.notification.NotificationService;
 import com.pdks.user.User;
@@ -22,12 +22,13 @@ import java.util.UUID;
 @Slf4j
 public class TenantService {
 
-    private final TenantRepository   tenantRepo;
-    private final DataSource         dataSource;
-    private final TenantFlywayConfig flywayConfig;
-    private final UserRepository     userRepo;
-    private final PasswordEncoder    passwordEncoder;
-    private final NotificationService notificationService;
+    private final TenantRepository        tenantRepo;
+    private final DataSource               dataSource;
+    private final TenantFlywayConfig       flywayConfig;
+    private final UserRepository           userRepo;
+    private final PasswordEncoder          passwordEncoder;
+    private final NotificationService      notificationService;
+    private final EmailVerificationService emailVerificationService;
     // ── Kayıt ────────────────────────────────────────────────────────────────
 
     /**
@@ -57,6 +58,8 @@ public class TenantService {
         tenant.setContactPhone(dto.getContactPhone());
         tenant.setMaxBranches(resolveMaxBranches(dto.getPlan()));
         tenant.setMaxEmployees(resolveMaxEmployees(dto.getPlan()));
+        // verified=false — önce e-posta doğrulaması gerekli, trial henüz başlamadı
+        tenant.setVerified(false);
         tenant = tenantRepo.save(tenant);
 
         // 2. Schema aç
@@ -65,7 +68,7 @@ public class TenantService {
         // 3. Tablolar
         flywayConfig.migrateSchema(schemaName);
 
-        // 4. İlk admin kullanıcı — tenant schema'sı aktif olduğunda oluşturulur
+        // 4. İlk admin kullanıcı
         String rawPassword = (dto.getAdminPassword() != null && !dto.getAdminPassword().isBlank())
             ? dto.getAdminPassword()
             : "Pdks@2025!";
@@ -80,13 +83,13 @@ public class TenantService {
         log.info("Yeni tenant oluşturuldu: {} → {} | admin: {}",
             tenant.getCompanyName(), schemaName, dto.getContactEmail());
 
-
-        // Email gönder
-        notificationService.sendWelcomeEmail(
+        // 5. Aktivasyon maili gönder (hoşgeldin değil — önce e-posta doğrulaması)
+        emailVerificationService.sendVerificationEmail(
+                tenant.getId(),
                 dto.getContactEmail(),
-                tenant.getCompanyName(),
-                rawPassword
+                tenant.getCompanyName()
         );
+
         return new TenantRegistrationResult(tenant, dto.getContactEmail(), rawPassword);
     }
 

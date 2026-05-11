@@ -12,8 +12,15 @@ import java.util.UUID;
 @Table(name = "tenants", schema = "public")
 @Data
 public class Tenant {
-    // Abonelik
+    // E-posta doğrulama
+    private Boolean verified = false;
+    private LocalDateTime verifiedAt;
+
+    // Trial
+    private LocalDateTime trialStartedAt;
     private LocalDateTime trialEndsAt;
+
+    // Abonelik
     private LocalDateTime subscriptionEndsAt;
 
     // Notlar
